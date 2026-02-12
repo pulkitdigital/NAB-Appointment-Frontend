@@ -12,7 +12,8 @@ import Dashboard from './pages/admin/Dashboard';
 import Appointments from './pages/admin/Appointments';
 import CA from './pages/admin/CA';
 import Settings from './pages/admin/Settings';
-
+import CAListingSimple from './pages/Calistingsimple';
+import CAListing from './pages/CAListing';
 function App() {
   useEffect(() => {
     // ✅ Set default business ID on app load
@@ -30,7 +31,8 @@ function App() {
         <Route path="/" element={<Navigate to="/book" replace />} />
         <Route path="/book" element={<Book />} />
         <Route path="/confirmation/:bookingId" element={<Confirmation />} />
-
+        <Route path="/cas" element={<CAListingSimple />} />
+        <Route path="/ca-listing" element={<CAListing />} />
         {/* Admin Routes */}
         <Route path="/admin" element={<AdminLayout />}>
           <Route index element={<Dashboard />} />

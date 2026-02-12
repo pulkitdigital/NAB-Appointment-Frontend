@@ -20,6 +20,7 @@ const Confirmation = () => {
       const response = await getBookingById(bookingId);
       if (response.success) {
         setBooking(response.data);
+        console.log('📋 Booking data:', response.data); // Debug
       } else {
         setError('Booking not found');
       }
@@ -30,6 +31,12 @@ const Confirmation = () => {
       setLoading(false);
     }
   };
+
+  // ✅ Helper — Firestore ke customer_name / name dono handle karo
+  const getName    = (b) => b.customer_name    || b.name    || '—';
+  const getEmail   = (b) => b.customer_email   || b.email   || '—';
+  const getPhone   = (b) => b.customer_phone   || b.mobile  || b.phone || '—';
+  const getNote    = (b) => b.consult_note     || b.notes   || '';
 
   if (loading) {
     return (
@@ -58,7 +65,7 @@ const Confirmation = () => {
           <h2 className="text-2xl font-bold text-gray-900 mb-2">Error</h2>
           <p className="text-gray-600 mb-6">{error}</p>
           <button
-            onClick={() => navigate('/book')}
+            onClick={() => navigate('/appointment')}
             className="w-full px-6 py-3 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors font-semibold"
           >
             Book New Appointment
@@ -88,7 +95,7 @@ const Confirmation = () => {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>
             </motion.div>
-            
+
             <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">
               Booking Confirmed!
             </h1>
@@ -101,11 +108,9 @@ const Confirmation = () => {
         {/* Appointment Details */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-6">
           <div className="border-b border-gray-200 px-6 py-4 bg-gray-50">
-            <h2 className="text-lg font-bold text-gray-900">
-              Appointment Details
-            </h2>
+            <h2 className="text-lg font-bold text-gray-900">Appointment Details</h2>
           </div>
-          
+
           <div className="p-6 space-y-4">
             <div className="flex items-start">
               <div className="w-40 text-sm text-gray-600 font-medium">Reference ID:</div>
@@ -117,14 +122,14 @@ const Confirmation = () => {
             <div className="flex items-start">
               <div className="w-40 text-sm text-gray-600 font-medium">Date:</div>
               <div className="flex-1 font-semibold text-gray-900">
-                {format(new Date(booking.date), 'EEEE, MMMM d, yyyy')}
+                {booking.date ? format(new Date(booking.date), 'EEEE, MMMM d, yyyy') : '—'}
               </div>
             </div>
 
             <div className="flex items-start">
               <div className="w-40 text-sm text-gray-600 font-medium">Time:</div>
               <div className="flex-1 font-semibold text-gray-900">
-                {booking.time_slot}
+                {booking.time_slot || '—'}
               </div>
             </div>
 
@@ -153,40 +158,44 @@ const Confirmation = () => {
           </div>
         </div>
 
-        {/* Your Information */}
+        {/* ✅ Your Information — Fixed field names */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-6">
           <div className="border-b border-gray-200 px-6 py-4 bg-gray-50">
-            <h2 className="text-lg font-bold text-gray-900">
-              Your Information
-            </h2>
+            <h2 className="text-lg font-bold text-gray-900">Your Information</h2>
           </div>
-          
+
           <div className="p-6 space-y-4">
             <div className="flex items-start">
               <div className="w-40 text-sm text-gray-600 font-medium">Name:</div>
-              <div className="flex-1 font-semibold text-gray-900">{booking.name}</div>
+              <div className="flex-1 font-semibold text-gray-900">
+                {getName(booking)}
+              </div>
             </div>
 
             <div className="flex items-start">
               <div className="w-40 text-sm text-gray-600 font-medium">Mobile:</div>
-              <div className="flex-1 font-semibold text-gray-900">{booking.mobile}</div>
+              <div className="flex-1 font-semibold text-gray-900">
+                {getPhone(booking)}
+              </div>
             </div>
 
             <div className="flex items-start">
               <div className="w-40 text-sm text-gray-600 font-medium">Email:</div>
-              <div className="flex-1 font-semibold text-gray-900">{booking.email}</div>
+              <div className="flex-1 font-semibold text-gray-900">
+                {getEmail(booking)}
+              </div>
             </div>
 
-            {booking.consult_note && (
+            {getNote(booking) && (
               <div className="flex items-start">
                 <div className="w-40 text-sm text-gray-600 font-medium">Notes:</div>
-                <div className="flex-1 text-gray-700">{booking.consult_note}</div>
+                <div className="flex-1 text-gray-700">{getNote(booking)}</div>
               </div>
             )}
           </div>
         </div>
 
-        {/* What's Next Info Box */}
+        {/* What's Next */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
           <div className="flex items-start gap-3">
             <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
@@ -199,7 +208,7 @@ const Confirmation = () => {
               <ul className="text-sm text-gray-700 space-y-2">
                 <li className="flex items-start gap-2">
                   <span className="text-gray-400 mt-0.5">•</span>
-                  <span>A confirmation email has been sent to {booking.email}</span>
+                  <span>A confirmation email has been sent to {getEmail(booking)}</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="text-gray-400 mt-0.5">•</span>
@@ -230,9 +239,9 @@ const Confirmation = () => {
               </svg>
               Print Details
             </button>
-            
+
             <button
-              onClick={() => navigate('/book')}
+              onClick={() => navigate('/appointment')}
               className="flex-1 px-6 py-3 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors font-semibold"
             >
               Book Another Appointment
@@ -240,7 +249,7 @@ const Confirmation = () => {
           </div>
         </div>
 
-        {/* Support Link */}
+        {/* Support */}
         <div className="text-center mt-8">
           <p className="text-sm text-gray-600">
             Need to reschedule or have questions?{' '}
