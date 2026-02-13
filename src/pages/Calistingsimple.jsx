@@ -84,8 +84,9 @@ const CAListingSimple = () => {
       return;
     }
     
-    const url = `/appointment?ca_id=${caId}`;
-    console.log('Navigating to:', url);
+    // ✅ FIXED: Use /book instead of /appointment
+    const url = `/book?ca_id=${caId}`;
+    console.log('✅ Navigating to:', url);
     console.log('===========================');
     
     navigate(url);

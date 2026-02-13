@@ -29,6 +29,7 @@ function App() {
       <Routes>
         {/* User Routes */}
         <Route path="/" element={<Navigate to="/book" replace />} />
+        <Route path="/appointment" element={<Book />} />
         <Route path="/book" element={<Book />} />
         <Route path="/confirmation/:bookingId" element={<Confirmation />} />
         <Route path="/cas" element={<CAListingSimple />} />
