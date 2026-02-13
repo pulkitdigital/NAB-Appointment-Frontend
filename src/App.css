@@ -1,0 +1,19 @@
+src/components/UserLayout.css */
+
+.user-layout {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.main-content {
+  flex: 1;
+  /* Add padding if needed */
+  /* padding: 2rem 0; */
+}
+
+/* Optional: Add spacing between header and content */
+.main-content {
+  margin-top: 0; /* Adjust if header is sticky */
+}
+

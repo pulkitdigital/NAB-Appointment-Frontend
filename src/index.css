@@ -1,1 +1,21 @@
 @import "tailwindcss";
+
+.font-archivo {
+  font-family: 'Archivo', sans-serif;
+}
+
+.font-poppins {
+  font-family: 'Poppins', sans-serif;
+}
+.footer-bg {
+  background-image: url("/footerbg.jpg");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+.cas-header{
+  background-image: url("/cas-header.jpg");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
