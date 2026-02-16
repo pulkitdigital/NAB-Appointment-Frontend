@@ -28,7 +28,7 @@
 //     const urlCAId = searchParams.get("ca_id");
 //     const selectedId = preSelectedCAId || urlCAId;
 
-//     console.log("=== APPOINTMENT FORM DEBUG ===");
+//     console.log("=== APPOINTMENT FORM CA PRE-SELECTION ===");
 //     console.log("1. URL:", window.location.href);
 //     console.log("2. URL CA_ID:", urlCAId);
 //     console.log("3. Prop CA_ID:", preSelectedCAId);
@@ -36,47 +36,50 @@
 //     console.log("5. CA List Loaded:", caList.length, "CAs");
 //     console.log("6. Current formData.ca_id:", formData.ca_id);
 
-//     if (selectedId && caList.length > 0) {
-//       console.log("7. Searching for matching CA with ID:", selectedId);
-
-//       // Try to find CA matching any ID field
-//       const matchingCA = caList.find((ca) => {
-//         const caId = getCAId(ca);
-//         const matches = String(caId) === String(selectedId);
-//         if (matches) {
-//           console.log("   ✅ MATCH FOUND:", ca.name, "ID:", caId);
-//         }
-//         return matches;
-//       });
-
-//       // if (matchingCA && !formData.ca_id) {
-//       //   const actualId = getCAId(matchingCA);
-//       //   console.log('8. ✅ Setting CA:', matchingCA.name, 'ID:', actualId);
-//       //   onChange({ ...formData, ca_id: String(actualId) });
-//       // } else if (!matchingCA) {
-//       //   console.log('8. ❌ NO MATCHING CA FOUND');
-//       //   console.log('Available CAs:', caList.map(ca => ({
-//       //     name: ca.name,
-//       //     id: getCAId(ca)
-//       //   })));
-//       // }
-//       if (
-//         matchingCA &&
-//         String(formData.ca_id) !== String(getCAId(matchingCA))
-//       ) {
-//         const actualId = getCAId(matchingCA);
-//         console.log("8. ✅ Setting CA:", matchingCA.name, "ID:", actualId);
-//         onChange({ ...formData, ca_id: String(actualId) });
-//       } else if (matchingCA) {
-//         console.log("8. ✅ CA already correctly set:", formData.ca_id);
-//       } else {
-//         console.log("8. ⏭️  CA already selected:", formData.ca_id);
-//       }
-//     } else {
-//       console.log("7. ⏭️  No ID to pre-select or CA list not loaded yet");
+//     // Only proceed if:
+//     // - We have a CA ID to pre-select
+//     // - CA list is loaded
+//     // - Form doesn't already have the correct CA selected
+//     if (!selectedId || caList.length === 0) {
+//       console.log("7. ⏭️  Skipping pre-selection: No ID or CA list not loaded");
+//       console.log("==========================================\n");
+//       return;
 //     }
-//     console.log("==============================");
-//   }, [caList, searchParams, preSelectedCAId]);
+
+//     console.log("7. Searching for matching CA with ID:", selectedId);
+
+//     // Try to find CA matching any ID field
+//     const matchingCA = caList.find((ca) => {
+//       const caId = getCAId(ca);
+//       const matches = String(caId) === String(selectedId);
+//       if (matches) {
+//         console.log("   ✅ MATCH FOUND:", ca.name, "ID:", caId);
+//       }
+//       return matches;
+//     });
+
+//     if (!matchingCA) {
+//       console.log("8. ❌ NO MATCHING CA FOUND for ID:", selectedId);
+//       console.log("   Available CAs:", caList.map(ca => ({
+//         name: ca.name,
+//         id: getCAId(ca)
+//       })));
+//       console.log("==========================================\n");
+//       return;
+//     }
+
+//     const actualId = getCAId(matchingCA);
+    
+//     // Check if we need to update the form
+//     if (String(formData.ca_id) !== String(actualId)) {
+//       console.log("8. ✅ Setting CA:", matchingCA.name, "ID:", actualId);
+//       onChange({ ...formData, ca_id: String(actualId) });
+//     } else {
+//       console.log("8. ✅ CA already correctly set:", matchingCA.name);
+//     }
+    
+//     console.log("==========================================\n");
+//   }, [caList, searchParams, preSelectedCAId, formData.ca_id, onChange]);
 
 //   const fetchCAs = async () => {
 //     try {
@@ -87,11 +90,22 @@
 //         const activeCAs = (response.data.cas || response.data || []).filter(
 //           (ca) => ca.status === "active",
 //         );
-//         console.log("✅ Active CAs:", activeCAs.length);
+//         console.log("✅ Active CAs loaded:", activeCAs.length);
 
 //         if (activeCAs.length > 0) {
 //           console.log("First CA object:", activeCAs[0]);
 //           console.log("First CA keys:", Object.keys(activeCAs[0]));
+//           console.log("\nAll CA ID mappings:");
+//           activeCAs.forEach((ca, idx) => {
+//             console.log(`  ${idx + 1}. ${ca.name}:`, {
+//               id: ca.id,
+//               _id: ca._id,
+//               ca_id: ca.ca_id,
+//               userId: ca.userId,
+//               user_id: ca.user_id,
+//               final_id: ca.id || ca._id || ca.ca_id || ca.userId || ca.user_id
+//             });
+//           });
 //         }
 
 //         setCAList(activeCAs);
@@ -109,7 +123,7 @@
 //     const { name, value } = e.target;
 
 //     if (name === "ca_id") {
-//       console.log("📝 CA Changed to:", value);
+//       console.log("📝 CA manually changed to:", value);
 //       onChange({ ...formData, [name]: value, time_slot: "" });
 //     } else {
 //       onChange({ ...formData, [name]: value });
@@ -126,8 +140,8 @@
 //         <h3 className="text-lg font-bold text-gray-900">Your Information</h3>
 //       </div>
 
-//       {/* Debug Banner */}
-//       {(searchParams.get("ca_id") || preSelectedCAId) && (
+//       {/* Debug Banner - Shows only when there's a pre-selected CA */}
+//       {/* {(searchParams.get("ca_id") || preSelectedCAId) && (
 //         <div className="bg-blue-50 border-l-4 border-blue-400 p-4">
 //           <div className="flex">
 //             <div className="flex-shrink-0">
@@ -145,16 +159,21 @@
 //             </div>
 //             <div className="ml-3">
 //               <p className="text-sm text-blue-700">
-//                 <strong>Debug:</strong>
+//                 <strong>CA Pre-selection Debug:</strong>
 //                 {preSelectedCAId && ` Prop CA ID: ${preSelectedCAId} |`}
 //                 {searchParams.get("ca_id") &&
 //                   ` URL CA ID: ${searchParams.get("ca_id")} |`}
-//                 {` Form CA ID: ${formData.ca_id || "Not set"} | CAs: ${caList.length}`}
+//                 {` Form CA ID: ${formData.ca_id || "Not set"} | Total CAs: ${caList.length}`}
 //               </p>
+//               {formData.ca_id && caList.length > 0 && (
+//                 <p className="text-xs text-blue-600 mt-1">
+//                   ✓ Selected: {caList.find(ca => String(getCAId(ca)) === String(formData.ca_id))?.name || 'Unknown'}
+//                 </p>
+//               )}
 //             </div>
 //           </div>
 //         </div>
-//       )}
+//       )} */}
 
 //       <div className="space-y-4">
 //         <div>
@@ -438,6 +457,7 @@
 
 
 
+
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { getCAList } from "../services/api";
@@ -464,7 +484,6 @@ const AppointmentForm = ({
 
   // Pre-select CA from URL OR from props
   useEffect(() => {
-    // Priority: props > URL parameter
     const urlCAId = searchParams.get("ca_id");
     const selectedId = preSelectedCAId || urlCAId;
 
@@ -476,10 +495,6 @@ const AppointmentForm = ({
     console.log("5. CA List Loaded:", caList.length, "CAs");
     console.log("6. Current formData.ca_id:", formData.ca_id);
 
-    // Only proceed if:
-    // - We have a CA ID to pre-select
-    // - CA list is loaded
-    // - Form doesn't already have the correct CA selected
     if (!selectedId || caList.length === 0) {
       console.log("7. ⏭️  Skipping pre-selection: No ID or CA list not loaded");
       console.log("==========================================\n");
@@ -488,7 +503,6 @@ const AppointmentForm = ({
 
     console.log("7. Searching for matching CA with ID:", selectedId);
 
-    // Try to find CA matching any ID field
     const matchingCA = caList.find((ca) => {
       const caId = getCAId(ca);
       const matches = String(caId) === String(selectedId);
@@ -510,7 +524,6 @@ const AppointmentForm = ({
 
     const actualId = getCAId(matchingCA);
     
-    // Check if we need to update the form
     if (String(formData.ca_id) !== String(actualId)) {
       console.log("8. ✅ Setting CA:", matchingCA.name, "ID:", actualId);
       onChange({ ...formData, ca_id: String(actualId) });
@@ -574,52 +587,18 @@ const AppointmentForm = ({
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="space-y-5"
+      className="space-y-4 sm:space-y-5"
     >
       <div className="flex items-center justify-between">
-        <h3 className="text-lg font-bold text-gray-900">Your Information</h3>
+        <h3 className="text-base sm:text-lg font-bold text-gray-900">Your Information</h3>
       </div>
 
-      {/* Debug Banner - Shows only when there's a pre-selected CA */}
-      {/* {(searchParams.get("ca_id") || preSelectedCAId) && (
-        <div className="bg-blue-50 border-l-4 border-blue-400 p-4">
-          <div className="flex">
-            <div className="flex-shrink-0">
-              <svg
-                className="h-5 w-5 text-blue-400"
-                viewBox="0 0 20 20"
-                fill="currentColor"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
-                  clipRule="evenodd"
-                />
-              </svg>
-            </div>
-            <div className="ml-3">
-              <p className="text-sm text-blue-700">
-                <strong>CA Pre-selection Debug:</strong>
-                {preSelectedCAId && ` Prop CA ID: ${preSelectedCAId} |`}
-                {searchParams.get("ca_id") &&
-                  ` URL CA ID: ${searchParams.get("ca_id")} |`}
-                {` Form CA ID: ${formData.ca_id || "Not set"} | Total CAs: ${caList.length}`}
-              </p>
-              {formData.ca_id && caList.length > 0 && (
-                <p className="text-xs text-blue-600 mt-1">
-                  ✓ Selected: {caList.find(ca => String(getCAId(ca)) === String(formData.ca_id))?.name || 'Unknown'}
-                </p>
-              )}
-            </div>
-          </div>
-        </div>
-      )} */}
-
-      <div className="space-y-4">
+      <div className="space-y-3 sm:space-y-4">
+        {/* Full Name */}
         <div>
           <label
             htmlFor="name"
-            className="block text-sm font-semibold text-gray-700 mb-2"
+            className="block text-xs sm:text-sm font-semibold text-gray-700 mb-1.5 sm:mb-2"
           >
             Full Name <span className="text-red-500">*</span>
           </label>
@@ -630,14 +609,14 @@ const AppointmentForm = ({
             value={formData.name || ""}
             onChange={handleChange}
             placeholder="Enter your full name"
-            className={`w-full px-4 py-2.5 rounded-lg border ${
+            className={`w-full px-3 sm:px-4 py-2 sm:py-2.5 text-sm sm:text-base rounded-lg border ${
               errors.name ? "border-red-500" : "border-gray-300"
             } focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all outline-none`}
             required
           />
           {errors.name && (
-            <p className="mt-1.5 text-sm text-red-600 flex items-center gap-1">
-              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+            <p className="mt-1 sm:mt-1.5 text-xs sm:text-sm text-red-600 flex items-center gap-1">
+              <svg className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                 <path
                   fillRule="evenodd"
                   d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
@@ -649,10 +628,11 @@ const AppointmentForm = ({
           )}
         </div>
 
+        {/* Mobile Number */}
         <div>
           <label
             htmlFor="mobile"
-            className="block text-sm font-semibold text-gray-700 mb-2"
+            className="block text-xs sm:text-sm font-semibold text-gray-700 mb-1.5 sm:mb-2"
           >
             Mobile Number <span className="text-red-500">*</span>
           </label>
@@ -665,14 +645,14 @@ const AppointmentForm = ({
             placeholder="10-digit mobile number"
             maxLength="10"
             pattern="[0-9]{10}"
-            className={`w-full px-4 py-2.5 rounded-lg border ${
+            className={`w-full px-3 sm:px-4 py-2 sm:py-2.5 text-sm sm:text-base rounded-lg border ${
               errors.mobile ? "border-red-500" : "border-gray-300"
             } focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all outline-none`}
             required
           />
           {errors.mobile && (
-            <p className="mt-1.5 text-sm text-red-600 flex items-center gap-1">
-              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+            <p className="mt-1 sm:mt-1.5 text-xs sm:text-sm text-red-600 flex items-center gap-1">
+              <svg className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                 <path
                   fillRule="evenodd"
                   d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
@@ -684,10 +664,11 @@ const AppointmentForm = ({
           )}
         </div>
 
+        {/* Email Address */}
         <div>
           <label
             htmlFor="email"
-            className="block text-sm font-semibold text-gray-700 mb-2"
+            className="block text-xs sm:text-sm font-semibold text-gray-700 mb-1.5 sm:mb-2"
           >
             Email Address <span className="text-red-500">*</span>
           </label>
@@ -698,14 +679,14 @@ const AppointmentForm = ({
             value={formData.email || ""}
             onChange={handleChange}
             placeholder="your.email@example.com"
-            className={`w-full px-4 py-2.5 rounded-lg border ${
+            className={`w-full px-3 sm:px-4 py-2 sm:py-2.5 text-sm sm:text-base rounded-lg border ${
               errors.email ? "border-red-500" : "border-gray-300"
             } focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all outline-none`}
             required
           />
           {errors.email && (
-            <p className="mt-1.5 text-sm text-red-600 flex items-center gap-1">
-              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+            <p className="mt-1 sm:mt-1.5 text-xs sm:text-sm text-red-600 flex items-center gap-1">
+              <svg className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                 <path
                   fillRule="evenodd"
                   d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
@@ -717,13 +698,14 @@ const AppointmentForm = ({
           )}
         </div>
 
+        {/* Select CA */}
         <div>
           <label
             htmlFor="ca_id"
-            className="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2"
+            className="block text-xs sm:text-sm font-semibold text-gray-700 mb-1.5 sm:mb-2 flex items-center gap-2"
           >
             <svg
-              className="w-5 h-5 text-gray-700"
+              className="w-4 h-4 sm:w-5 sm:h-5 text-gray-700 flex-shrink-0"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -735,11 +717,11 @@ const AppointmentForm = ({
                 d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
               />
             </svg>
-            Select Chartered Accountant <span className="text-red-500">*</span>
+            <span>Select Chartered Accountant <span className="text-red-500">*</span></span>
           </label>
           {loadingCAs ? (
-            <div className="w-full px-4 py-2.5 rounded-lg border border-gray-300 text-gray-400 flex items-center gap-2">
-              <div className="inline-block animate-spin rounded-full h-4 w-4 border-2 border-gray-300 border-t-gray-900"></div>
+            <div className="w-full px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg border border-gray-300 text-gray-400 flex items-center gap-2 text-sm sm:text-base">
+              <div className="inline-block animate-spin rounded-full h-3 w-3 sm:h-4 sm:w-4 border-2 border-gray-300 border-t-gray-900"></div>
               Loading CAs...
             </div>
           ) : (
@@ -750,7 +732,7 @@ const AppointmentForm = ({
                   name="ca_id"
                   value={formData.ca_id || ""}
                   onChange={handleChange}
-                  className={`w-full px-4 py-2.5 rounded-lg border ${
+                  className={`w-full px-3 sm:px-4 py-2 sm:py-2.5 text-sm sm:text-base rounded-lg border ${
                     errors.ca_id ? "border-red-500" : "border-gray-300"
                   } focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all outline-none appearance-none cursor-pointer bg-white`}
                   required
@@ -763,8 +745,7 @@ const AppointmentForm = ({
                       const caId = getCAId(ca);
                       return (
                         <option key={caId} value={caId}>
-                          {ca.name} - {ca.specialization} ({ca.experience} years
-                          exp.)
+                          {ca.name} - {ca.specialization} ({ca.experience} years exp.)
                         </option>
                       );
                     })
@@ -774,9 +755,9 @@ const AppointmentForm = ({
                     </option>
                   )}
                 </select>
-                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-500">
+                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 sm:px-3 text-gray-500">
                   <svg
-                    className="w-5 h-5"
+                    className="w-4 h-4 sm:w-5 sm:h-5"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -791,9 +772,9 @@ const AppointmentForm = ({
                 </div>
               </div>
               {caList.length === 0 && !loadingCAs && (
-                <p className="mt-2 text-sm text-amber-600 flex items-center gap-1">
+                <p className="mt-1.5 sm:mt-2 text-xs sm:text-sm text-amber-600 flex items-center gap-1">
                   <svg
-                    className="w-4 h-4"
+                    className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0"
                     fill="currentColor"
                     viewBox="0 0 20 20"
                   >
@@ -807,9 +788,9 @@ const AppointmentForm = ({
                 </p>
               )}
               {formData.ca_id && (
-                <p className="mt-2 text-xs text-gray-600 flex items-center gap-1">
+                <p className="mt-1.5 sm:mt-2 text-[10px] sm:text-xs text-gray-600 flex items-center gap-1">
                   <svg
-                    className="w-4 h-4"
+                    className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -827,8 +808,8 @@ const AppointmentForm = ({
             </>
           )}
           {errors.ca_id && (
-            <p className="mt-1.5 text-sm text-red-600 flex items-center gap-1">
-              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+            <p className="mt-1 sm:mt-1.5 text-xs sm:text-sm text-red-600 flex items-center gap-1">
+              <svg className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                 <path
                   fillRule="evenodd"
                   d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
@@ -840,10 +821,11 @@ const AppointmentForm = ({
           )}
         </div>
 
+        {/* Consultation Details */}
         <div>
           <label
             htmlFor="consult_note"
-            className="block text-sm font-semibold text-gray-700 mb-2"
+            className="block text-xs sm:text-sm font-semibold text-gray-700 mb-1.5 sm:mb-2"
           >
             Consultation Details <span className="text-red-500">*</span>
           </label>
@@ -853,15 +835,15 @@ const AppointmentForm = ({
             value={formData.consult_note || ""}
             onChange={handleChange}
             placeholder="Brief description of what you'd like to discuss..."
-            rows="4"
-            className={`w-full px-4 py-2.5 rounded-lg border ${
+            rows="3"
+            className={`w-full px-3 sm:px-4 py-2 sm:py-2.5 text-sm sm:text-base rounded-lg border ${
               errors.consult_note ? "border-red-500" : "border-gray-300"
             } focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all outline-none resize-none`}
             required
           />
           {errors.consult_note && (
-            <p className="mt-1.5 text-sm text-red-600 flex items-center gap-1">
-              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+            <p className="mt-1 sm:mt-1.5 text-xs sm:text-sm text-red-600 flex items-center gap-1">
+              <svg className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                 <path
                   fillRule="evenodd"
                   d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
@@ -871,7 +853,7 @@ const AppointmentForm = ({
               {errors.consult_note}
             </p>
           )}
-          <p className="mt-1.5 text-xs text-gray-500">
+          <p className="mt-1 sm:mt-1.5 text-[10px] sm:text-xs text-gray-500">
             Minimum 10 characters required
           </p>
         </div>
