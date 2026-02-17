@@ -22,9 +22,9 @@ plugins {
 
 def twaManifest = [
     applicationId: 'app.vercel.nab_appointment_frontend.twa',
-    hostName: 'nab-appointment-frontend.vercel.app/', // The domain being opened in the TWA.
+    hostName: 'nab-appointment-frontend.vercel.app', // The domain being opened in the TWA.
     launchUrl: '/admin', // The start path for the TWA. Must be relative to the domain.
-    name: 'NAB Consultancy Appointment', // The application name.
+    name: 'NAB Consultancy Admin', // The application name.
     launcherName: 'NAB Admin', // The name shown on the Android Launcher.
     themeColor: '#111827', // The color used for the status bar.
     themeColorDark: '#000000', // The color used for the dark status bar.
